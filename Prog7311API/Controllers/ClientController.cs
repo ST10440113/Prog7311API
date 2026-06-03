@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Prog7311API.Data;
+using Prog7311API.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -6,14 +9,26 @@ namespace Prog7311API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientController : ControllerBase
+    [Produces("application/json")]
+    public class ClientController : Controller
     {
-        // GET: api/<ClientController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly DataContext _context;
+
+        public ClientController(DataContext context)
         {
-            return new string[] { "value1", "value2" };
+            _context = context;
         }
+        // GET: api/<ClientController>
+       
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Client>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        {
+            var clients = await _context.Clients.ToListAsync();
+            return Ok(clients);
+        }
+
+
 
         // GET api/<ClientController>/5
         [HttpGet("{id}")]
@@ -24,8 +39,11 @@ namespace Prog7311API.Controllers
 
         // POST api/<ClientController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Client>> AddClient(Client client)
         {
+            _context.Clients.Add(client);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetClients), new { id = client.ClientId }, client);
         }
 
         // PUT api/<ClientController>/5

@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Prog7311API.Data;
 
@@ -14,7 +15,8 @@ namespace Prog7311API
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+      
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<DataContext>(options =>
@@ -24,14 +26,15 @@ namespace Prog7311API
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+               
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
-           
+     
             app.MapControllers();
 
             app.Run();

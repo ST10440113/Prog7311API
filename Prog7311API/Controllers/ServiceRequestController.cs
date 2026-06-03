@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Prog7311API.Data;
+using Prog7311API.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -6,15 +9,24 @@ namespace Prog7311API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ServiceRequestController : ControllerBase
+    [Produces("application/json")]
+    public class ServiceRequestController : Controller
     {
-        // GET: api/<ServiceRequestController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly DataContext _context;
+
+        public ServiceRequestController(DataContext context)
         {
-            return new string[] { "value1", "value2" };
+            _context = context;
         }
 
+        // GET: api/<ServiceRequestController>
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<ServiceRequest>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ServiceRequest>>> GetServiceRequests()
+        {
+            var serviceRequests = await _context.ServiceRequests.ToListAsync();
+            return Ok(serviceRequests);
+        }
         // GET api/<ServiceRequestController>/5
         [HttpGet("{id}")]
         public string Get(int id)
