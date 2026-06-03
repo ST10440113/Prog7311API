@@ -1,0 +1,6 @@
+@Prog7311API_HostAddress = http://localhost:5159
+
+GET {{Prog7311API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
