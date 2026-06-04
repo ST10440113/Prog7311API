@@ -24,7 +24,7 @@ namespace Prog7311API.Controllers
         [ProducesResponseType(typeof(IEnumerable<Contract>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Contract>>> GetContracts()
         {
-            var contracts = await _context.Contracts.ToListAsync();
+            var contracts = await _context.Contract.ToListAsync();
             return Ok(contracts);
         }
 
@@ -32,14 +32,14 @@ namespace Prog7311API.Controllers
         [HttpGet("{id}")]
         public async Task<Contract> GetContractByIdAsync(int id)
         {
-              return  await _context.Contracts.FirstOrDefaultAsync(m => m.ContractId == id);  
+              return  await _context.Contract.FirstOrDefaultAsync(m => m.ContractId == id);  
         }
-
+        
         // POST api/<ContractController>
         [HttpPost]
         public async Task<ActionResult<Contract>> AddContract(Contract contract)
         {
-            _context.Contracts.Add(contract);
+            _context.Contract.Add(contract);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetContracts), new { id = contract.ContractId }, contract);
         }
@@ -48,10 +48,14 @@ namespace Prog7311API.Controllers
         [HttpPut("{id}")]
         public async Task UpdateContract(int id, Contract contract)
         {
-           _context.Contracts.Update(contract);
-           await _context.SaveChangesAsync();   
+            if (id == contract.ContractId)
+            {
+             _context.Entry(contract).State = EntityState.Modified;
+              await _context.SaveChangesAsync();
 
+            }         
         }
+        
 
         // DELETE api/<ContractController>/5
         [HttpDelete("{id}")]
@@ -60,7 +64,7 @@ namespace Prog7311API.Controllers
             var contract = await GetContractByIdAsync(id);
             if (contract != null)
             {
-                _context.Contracts.Remove(contract);
+                _context.Contract.Remove(contract);
             }
 
             await _context.SaveChangesAsync();

@@ -29,12 +29,11 @@ namespace Prog7311API.Controllers
         }
 
 
-
         // GET api/<ClientController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<Client> GetClientByIdAsync(int id)
         {
-            return "value";
+            return await _context.Clients.FirstOrDefaultAsync(m => m.ClientId == id);
         }
 
         // POST api/<ClientController>
@@ -46,16 +45,30 @@ namespace Prog7311API.Controllers
             return CreatedAtAction(nameof(GetClients), new { id = client.ClientId }, client);
         }
 
+
         // PUT api/<ClientController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task UpdateClient(int id, Client client)
         {
+            if (id == client.ClientId)
+            {
+                _context.Entry(client).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+            }
         }
 
         // DELETE api/<ClientController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task DeleteClient(int id)
         {
+            var client = await GetClientByIdAsync(id);
+            if (client != null)
+            {
+                _context.Clients.Remove(client);
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

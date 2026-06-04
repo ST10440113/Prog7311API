@@ -24,32 +24,52 @@ namespace Prog7311API.Controllers
         [ProducesResponseType(typeof(IEnumerable<ServiceRequest>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ServiceRequest>>> GetServiceRequests()
         {
-            var serviceRequests = await _context.ServiceRequests.ToListAsync();
+            var serviceRequests = await _context.ServiceRequest.ToListAsync();
             return Ok(serviceRequests);
         }
         // GET api/<ServiceRequestController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ServiceRequest> GetServiceRequestByIdAsync(int id)
         {
-            return "value";
+            return await _context.ServiceRequest.FirstOrDefaultAsync(m => m.ServiceRequestId == id);
         }
 
         // POST api/<ServiceRequestController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<ServiceRequest>> AddServiceRequest(ServiceRequest serviceRequest)
         {
+            _context.ServiceRequest.Add(serviceRequest);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetServiceRequestByIdAsync), 
+            new { id = serviceRequest.ServiceRequestId },serviceRequest);
         }
+
 
         // PUT api/<ServiceRequestController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task UpdateServiceRequest(int id, ServiceRequest serviceRequest)
         {
+            if (id == serviceRequest.ServiceRequestId)
+            {
+                _context.Entry(serviceRequest).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+            }
         }
 
         // DELETE api/<ServiceRequestController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task DeleteServiceRequest(int id)
         {
+            var serviceRequest = await GetServiceRequestByIdAsync(id);
+            if (serviceRequest != null)
+            {
+                _context.ServiceRequest.Remove(serviceRequest);
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
+
+
