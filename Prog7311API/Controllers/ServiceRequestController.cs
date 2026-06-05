@@ -27,6 +27,10 @@ namespace Prog7311API.Controllers
             var serviceRequests = await _context.ServiceRequest.ToListAsync();
             return Ok(serviceRequests);
         }
+
+
+
+
         // GET api/<ServiceRequestController>/5
         [HttpGet("{id}")]
         public async Task<ServiceRequest> GetServiceRequestByIdAsync(int id)
@@ -34,15 +38,21 @@ namespace Prog7311API.Controllers
             return await _context.ServiceRequest.FirstOrDefaultAsync(m => m.ServiceRequestId == id);
         }
 
+
+
+
         // POST api/<ServiceRequestController>
         [HttpPost]
         public async Task<ActionResult<ServiceRequest>> AddServiceRequest(ServiceRequest serviceRequest)
         {
             _context.ServiceRequest.Add(serviceRequest);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetServiceRequestByIdAsync), 
-            new { id = serviceRequest.ServiceRequestId },serviceRequest);
+            return CreatedAtAction(nameof(GetServiceRequestByIdAsync),
+            new { id = serviceRequest.ServiceRequestId }, serviceRequest);
         }
+
+
+
 
 
         // PUT api/<ServiceRequestController>/5
@@ -57,6 +67,9 @@ namespace Prog7311API.Controllers
             }
         }
 
+
+
+
         // DELETE api/<ServiceRequestController>/5
         [HttpDelete("{id}")]
         public async Task DeleteServiceRequest(int id)
@@ -68,6 +81,13 @@ namespace Prog7311API.Controllers
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        [HttpGet("FindContractByServiceRequestFK_Id/{id}")]
+        public async Task<Contract> FindContractByServiceRequestFK_Id(ServiceRequest sr)
+        {
+            var contract = await _context.Contract.FindAsync(sr.ContractId);
+            return contract;
         }
     }
 }

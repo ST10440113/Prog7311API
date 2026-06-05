@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Prog7311API.Data;
 using Prog7311API.Models;
@@ -22,19 +23,34 @@ namespace Prog7311API.Controllers
         // GET: api/<ContractController>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Contract>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Contract>>> GetContracts()
+        public async Task<ActionResult<IEnumerable<Contract>>> GetContracts(DateOnly? startDate, DateOnly? endDate, string? status)
         {
-            var contracts = await _context.Contract.ToListAsync();
-            return Ok(contracts);
+            var allContracts = await _context.Contract.Include(c => c.Client).ToListAsync();
+            if (startDate != null || endDate != null)
+            {
+                if (startDate != null && endDate != null)
+                {
+                    var contracts = FilterByDateRange(startDate, endDate);
+                    return Ok(contracts);
+                }               
+            }
+            if (!string.IsNullOrEmpty(status))
+            {
+                var contracts = FilterByStatus(status);
+                return Ok(contracts);
+            }
+            return Ok(allContracts);
         }
+
+
 
         // GET api/<ContractController>/5
         [HttpGet("{id}")]
         public async Task<Contract> GetContractByIdAsync(int id)
         {
-              return  await _context.Contract.FirstOrDefaultAsync(m => m.ContractId == id);  
+            return await _context.Contract.FirstOrDefaultAsync(m => m.ContractId == id);
         }
-        
+
         // POST api/<ContractController>
         [HttpPost]
         public async Task<ActionResult<Contract>> AddContract(Contract contract)
@@ -50,12 +66,12 @@ namespace Prog7311API.Controllers
         {
             if (id == contract.ContractId)
             {
-             _context.Entry(contract).State = EntityState.Modified;
-              await _context.SaveChangesAsync();
+                _context.Entry(contract).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
 
-            }         
+            }
         }
-        
+
 
         // DELETE api/<ContractController>/5
         [HttpDelete("{id}")]
@@ -69,6 +85,31 @@ namespace Prog7311API.Controllers
 
             await _context.SaveChangesAsync();
         }
+     
+        private bool IsContractExpired(Contract contract)
+        {
+            return contract.EndDate <= DateOnly.FromDateTime(DateTime.Now);
+        }
+
+        private IEnumerable<Contract> FilterByDateRange(DateOnly? startDate, DateOnly? endDate)
+        {
+            var dateRangeQuery = from contract in _context.Contract select contract;
+            var searchResults = dateRangeQuery.Where(c => c.StartDate >= startDate & c.EndDate <= endDate);
+            return searchResults.ToList();
+
+        }
+
+
+        
+        private IEnumerable<Contract> FilterByStatus(string status)
+        {
+            var statusQuery = from contract in _context.Contract select contract;
+            var searchResults = statusQuery.Where(c => c.Status == status);
+            return searchResults.ToList();
+
+        }
+
+        
     }
-    }
+}
 
