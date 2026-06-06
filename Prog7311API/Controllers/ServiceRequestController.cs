@@ -57,14 +57,15 @@ namespace Prog7311API.Controllers
 
         // PUT api/<ServiceRequestController>/5
         [HttpPut("{id}")]
-        public async Task UpdateServiceRequest(int id, ServiceRequest serviceRequest)
+        public async Task<ActionResult<ServiceRequest>> UpdateServiceRequest(int id, ServiceRequest serviceRequest)
         {
-            if (id == serviceRequest.ServiceRequestId)
+            if (id != serviceRequest.ServiceRequestId)
             {
-                _context.Entry(serviceRequest).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
+                return BadRequest();
             }
+            _context.Entry(serviceRequest).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(serviceRequest);
         }
 
 

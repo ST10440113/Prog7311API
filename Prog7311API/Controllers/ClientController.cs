@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Prog7311API.Data;
 using Prog7311API.Models;
+using System.Diagnostics.Contracts;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,7 +20,7 @@ namespace Prog7311API.Controllers
             _context = context;
         }
         // GET: api/<ClientController>
-       
+
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Client>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<Client>>> GetClients()
@@ -48,16 +49,17 @@ namespace Prog7311API.Controllers
 
         // PUT api/<ClientController>/5
         [HttpPut("{id}")]
-        public async Task UpdateClient(int id, Client client)
+        public async Task<ActionResult<Client>> UpdateClient(int id, Client client)
         {
-            if (id == client.ClientId)
+            if (id != client.ClientId)
             {
-                _context.Entry(client).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
+                return BadRequest();
             }
+            _context.Entry(client).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(client);
         }
-
+        
         // DELETE api/<ClientController>/5
         [HttpDelete("{id}")]
         public async Task DeleteClient(int id)
@@ -69,6 +71,12 @@ namespace Prog7311API.Controllers
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        [HttpGet("ClientExists/{id}")]
+        public bool ClientExists(int id)
+        {
+            return _context.Clients.Any(e => e.ClientId == id);
         }
     }
 }

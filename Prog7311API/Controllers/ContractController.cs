@@ -62,16 +62,16 @@ namespace Prog7311API.Controllers
 
         // PUT api/<ContractController>/5
         [HttpPut("{id}")]
-        public async Task UpdateContract(int id, Contract contract)
+        public async Task<ActionResult<Contract>> UpdateContract(int id, Contract contract)
         {
-            if (id == contract.ContractId)
+            if (id != contract.ContractId)
             {
-                _context.Entry(contract).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
+                return BadRequest();
             }
+            _context.Entry(contract).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(contract);
         }
-
 
         // DELETE api/<ContractController>/5
         [HttpDelete("{id}")]
